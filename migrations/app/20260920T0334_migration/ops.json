@@ -1,0 +1,535 @@
+[
+  {
+    "id": "dropConstraint.problem.problem_topicId_fkey",
+    "label": "Drop constraint \"problem_topicId_fkey\" on \"problem\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "problem_topicId_fkey",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"problem_topicId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "problem_topicId_fkey",
+          "public",
+          "\"public\".\"problem\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"problem_topicId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"problem\" DROP CONSTRAINT \"problem_topicId_fkey\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"problem_topicId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "problem_topicId_fkey",
+          "public",
+          "\"public\".\"problem\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropIndex.problem.problem_topicId_idx_6f05808f",
+    "label": "Drop index \"problem_topicId_idx_6f05808f\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "problem_topicId_idx_6f05808f",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"problem_topicId_idx_6f05808f\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"problem_topicId_idx_6f05808f\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop index \"problem_topicId_idx_6f05808f\"",
+        "sql": "DROP INDEX \"public\".\"problem_topicId_idx_6f05808f\"",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"problem_topicId_idx_6f05808f\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"problem_topicId_idx_6f05808f\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropColumn.problem.topicId",
+    "label": "Drop column \"topicId\" from \"problem\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "topicId",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"topicId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "problem",
+          "topicId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"topicId\"",
+        "sql": "ALTER TABLE \"public\".\"problem\" DROP COLUMN \"topicId\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"topicId\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "problem",
+          "topicId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropTable.topic",
+    "label": "Drop table \"topic\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "topic"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"topic\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"topic\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop table \"topic\"",
+        "sql": "DROP TABLE \"public\".\"topic\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"topic\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"topic\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropTable.category",
+    "label": "Drop table \"category\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "category"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"category\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"category\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop table \"category\"",
+        "sql": "DROP TABLE \"public\".\"category\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"category\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"category\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.section.description",
+    "label": "Add column \"description\" to \"section\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "description",
+        "table": "section"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"description\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "section",
+          "description"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"description\"",
+        "sql": "ALTER TABLE \"public\".\"section\" ADD COLUMN \"description\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"description\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "section",
+          "description"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.section.parentId",
+    "label": "Add column \"parentId\" to \"section\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "parentId",
+        "table": "section"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"parentId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "section",
+          "parentId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"parentId\"",
+        "sql": "ALTER TABLE \"public\".\"section\" ADD COLUMN \"parentId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"parentId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "section",
+          "parentId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.problem.sectionId",
+    "label": "Add column \"sectionId\" to \"problem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "sectionId",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"sectionId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "problem",
+          "sectionId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"sectionId\"",
+        "sql": "ALTER TABLE \"public\".\"problem\" ADD COLUMN \"sectionId\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"sectionId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "problem",
+          "sectionId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.problem.sectionId",
+    "label": "Set NOT NULL on \"problem\".\"sectionId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "sectionId",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"sectionId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "problem",
+          "sectionId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"sectionId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"problem\" WHERE \"sectionId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"sectionId\"",
+        "sql": "ALTER TABLE \"public\".\"problem\" ALTER COLUMN \"sectionId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"sectionId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "problem",
+          "sectionId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.problem.problem_sectionId_idx_5d1ea56b",
+    "label": "Create index \"problem_sectionId_idx_5d1ea56b\" on \"problem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "problem_sectionId_idx_5d1ea56b",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"problem_sectionId_idx_5d1ea56b\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"problem_sectionId_idx_5d1ea56b\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"problem_sectionId_idx_5d1ea56b\"",
+        "sql": "CREATE INDEX \"problem_sectionId_idx_5d1ea56b\" ON \"public\".\"problem\" (\"sectionId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"problem_sectionId_idx_5d1ea56b\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"problem_sectionId_idx_5d1ea56b\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.section.section_parentId_idx_6a68f597",
+    "label": "Create index \"section_parentId_idx_6a68f597\" on \"section\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "section_parentId_idx_6a68f597",
+        "table": "section"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"section_parentId_idx_6a68f597\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"section_parentId_idx_6a68f597\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"section_parentId_idx_6a68f597\"",
+        "sql": "CREATE INDEX \"section_parentId_idx_6a68f597\" ON \"public\".\"section\" (\"parentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"section_parentId_idx_6a68f597\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"section_parentId_idx_6a68f597\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.problem.problem_sectionId_fkey",
+    "label": "Add foreign key \"problem_sectionId_fkey\" on \"problem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "problem_sectionId_fkey",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"problem_sectionId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "problem_sectionId_fkey",
+          "public",
+          "\"public\".\"problem\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"problem_sectionId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"problem\"\nADD CONSTRAINT \"problem_sectionId_fkey\"\nFOREIGN KEY (\"sectionId\")\nREFERENCES \"public\".\"section\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"problem_sectionId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "problem_sectionId_fkey",
+          "public",
+          "\"public\".\"problem\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.section.section_parentId_fkey",
+    "label": "Add foreign key \"section_parentId_fkey\" on \"section\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "section_parentId_fkey",
+        "table": "section"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"section_parentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "section_parentId_fkey",
+          "public",
+          "\"public\".\"section\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"section_parentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"section\"\nADD CONSTRAINT \"section_parentId_fkey\"\nFOREIGN KEY (\"parentId\")\nREFERENCES \"public\".\"section\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"section_parentId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "section_parentId_fkey",
+          "public",
+          "\"public\".\"section\""
+        ]
+      }
+    ]
+  }
+]

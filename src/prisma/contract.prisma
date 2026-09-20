@@ -1,0 +1,75 @@
+// use prisma-8
+
+model Section {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true)
+
+  parentId Int?
+  parent   Section?  @relation("SectionTree", fields: [parentId], references: [id])
+  children Section[] @relation("SectionTree")
+
+  problems Problem[]
+
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+
+  @@index([parentId])
+}
+
+model Problem {
+  id           Int      @id @default(autoincrement())
+  sectionId    Int
+  title        String
+  leetcodeSlug String
+  leetcodeUrl  String
+  difficulty   String
+  sortOrder    Int      @default(0)
+  active       Boolean  @default(true)
+
+  section  Section        @relation(fields: [sectionId], references: [id])
+  progress UserProgress[]
+
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+
+  @@index([sectionId])
+  @@index([leetcodeSlug])
+  @@unique([sectionId, leetcodeSlug])
+}
+
+model User {
+  id               Int      @id @default(autoincrement())
+  leetcodeUsername String   @unique
+
+  progress UserProgress[]
+
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+}
+
+model UserProgress {
+  userId    Int
+  problemId Int
+  solved    Boolean @default(false)
+
+  user    User    @relation(fields: [userId], references: [id])
+  problem Problem @relation(fields: [problemId], references: [id])
+
+  updatedAt temporal.updatedAtString()
+
+  @@id([userId, problemId])
+  @@index([problemId])
+}
+
+model AdminUser {
+  id           Int    @id @default(autoincrement())
+  username     String @unique
+  passwordHash String
+
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+}

@@ -1,0 +1,125 @@
+[
+  {
+    "id": "dropConstraint.problem.problem_leetcodeSlug_key",
+    "label": "Drop constraint \"problem_leetcodeSlug_key\" on \"problem\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "problem_leetcodeSlug_key",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"problem_leetcodeSlug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "problem_leetcodeSlug_key",
+          "public",
+          "\"public\".\"problem\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"problem_leetcodeSlug_key\"",
+        "sql": "ALTER TABLE \"public\".\"problem\" DROP CONSTRAINT \"problem_leetcodeSlug_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"problem_leetcodeSlug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "problem_leetcodeSlug_key",
+          "public",
+          "\"public\".\"problem\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.problem.problem_sectionId_leetcodeSlug_key",
+    "label": "Add unique constraint on \"problem\" (sectionId, leetcodeSlug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "problem_sectionId_leetcodeSlug_key",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"problem_sectionId_leetcodeSlug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "problem_sectionId_leetcodeSlug_key",
+          "public",
+          "\"public\".\"problem\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"problem_sectionId_leetcodeSlug_key\"",
+        "sql": "ALTER TABLE \"public\".\"problem\" ADD CONSTRAINT \"problem_sectionId_leetcodeSlug_key\" UNIQUE (\"sectionId\", \"leetcodeSlug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"problem_sectionId_leetcodeSlug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "problem_sectionId_leetcodeSlug_key",
+          "public",
+          "\"public\".\"problem\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.problem.problem_leetcodeSlug_idx_e7c07694",
+    "label": "Create index \"problem_leetcodeSlug_idx_e7c07694\" on \"problem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "problem_leetcodeSlug_idx_e7c07694",
+        "table": "problem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"problem_leetcodeSlug_idx_e7c07694\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"problem_leetcodeSlug_idx_e7c07694\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"problem_leetcodeSlug_idx_e7c07694\"",
+        "sql": "CREATE INDEX \"problem_leetcodeSlug_idx_e7c07694\" ON \"public\".\"problem\" (\"leetcodeSlug\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"problem_leetcodeSlug_idx_e7c07694\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"problem_leetcodeSlug_idx_e7c07694\""
+        ]
+      }
+    ]
+  }
+]
