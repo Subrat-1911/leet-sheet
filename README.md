@@ -2,7 +2,7 @@
 
 A clean, public **LeetCode progress tracker** for organizing DSA practice into sections, topics, and problem lists.
 
-🔗 **Repository:** https://github.com/Subrat-1911/leet-sheet
+🔗 **Open Link:** https://leet-sheet.vercel.app/
 
 ## ✨ Features
 
