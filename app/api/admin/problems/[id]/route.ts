@@ -15,7 +15,8 @@ export async function PATCH(
 ) {
   try {
     const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("admin_session")?.value;
+    const sessionToken =
+      cookieStore.get("admin_session")?.value;
 
     if (!sessionToken) {
       return Response.json(
@@ -27,7 +28,8 @@ export async function PATCH(
       );
     }
 
-    const session = await verifySession(sessionToken);
+    const session =
+      await verifySession(sessionToken);
 
     if (!session) {
       return Response.json(
@@ -58,7 +60,10 @@ export async function PATCH(
     const leetcodeUrl = body.leetcodeUrl;
     const difficulty = body.difficulty;
 
-    if (typeof title !== "string" || !title.trim()) {
+    if (
+      typeof title !== "string" ||
+      !title.trim()
+    ) {
       return Response.json(
         {
           success: false,
@@ -95,11 +100,12 @@ export async function PATCH(
       );
     }
 
-    const problem = await db.orm.public.Problem
-      .where({
-        id: problemId,
-      })
-      .first();
+    const problem =
+      await db.orm.public.Problem
+        .where({
+          id: problemId,
+        })
+        .first();
 
     if (!problem) {
       return Response.json(
@@ -130,11 +136,12 @@ export async function PATCH(
       );
     }
 
-    const duplicateProblem = await db.orm.public.Problem
-      .where({
-        leetcodeSlug,
-      })
-      .first();
+    const duplicateProblem =
+      await db.orm.public.Problem
+        .where({
+          leetcodeSlug,
+        })
+        .first();
 
     if (
       duplicateProblem &&
@@ -143,7 +150,8 @@ export async function PATCH(
       return Response.json(
         {
           success: false,
-          error: "This LeetCode problem already exists.",
+          error:
+            "This LeetCode problem already exists.",
         },
         { status: 409 }
       );
@@ -166,7 +174,10 @@ export async function PATCH(
       problem: updatedProblem,
     });
   } catch (error) {
-    console.error("Update problem error:", error);
+    console.error(
+      "Update problem error:",
+      error
+    );
 
     return Response.json(
       {
@@ -184,7 +195,8 @@ export async function DELETE(
 ) {
   try {
     const cookieStore = await cookies();
-    const sessionToken = cookieStore.get("admin_session")?.value;
+    const sessionToken =
+      cookieStore.get("admin_session")?.value;
 
     if (!sessionToken) {
       return Response.json(
@@ -196,7 +208,8 @@ export async function DELETE(
       );
     }
 
-    const session = await verifySession(sessionToken);
+    const session =
+      await verifySession(sessionToken);
 
     if (!session) {
       return Response.json(
@@ -221,11 +234,12 @@ export async function DELETE(
       );
     }
 
-    const problem = await db.orm.public.Problem
-      .where({
-        id: problemId,
-      })
-      .first();
+    const problem =
+      await db.orm.public.Problem
+        .where({
+          id: problemId,
+        })
+        .first();
 
     if (!problem) {
       return Response.json(
@@ -237,6 +251,14 @@ export async function DELETE(
       );
     }
 
+    // Delete all progress records referencing this problem first.
+    await db.orm.public.UserProgress
+      .where({
+        problemId,
+      })
+      .delete();
+
+    // Now delete the problem itself.
     await db.orm.public.Problem
       .where({
         id: problemId,
@@ -245,10 +267,14 @@ export async function DELETE(
 
     return Response.json({
       success: true,
-      message: "Problem deleted successfully.",
+      message:
+        "Problem deleted successfully.",
     });
   } catch (error) {
-    console.error("Delete problem error:", error);
+    console.error(
+      "Delete problem error:",
+      error
+    );
 
     return Response.json(
       {
