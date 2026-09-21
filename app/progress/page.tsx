@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { db } from "@/lib/prisma";
-import { getSectionProgress } from "@/lib/section-progress";
+import { getAllSectionsProgress } from "@/lib/all-sections-progress";
+import ProgressSync from "./progress-sync";
 
 type PageProps = {
   searchParams: Promise<{
@@ -34,47 +35,30 @@ export default async function ProgressPage({
   }
 
   // Find user
-  let user = await db.orm.public.User
-    .where({
-      leetcodeUsername: username,
-    })
-    .first();
+  let user =
+    await db.orm.public.User
+      .where({
+        leetcodeUsername: username,
+      })
+      .first();
 
   // Create user if it doesn't exist
   if (!user) {
-    user = await db.orm.public.User.create({
-      leetcodeUsername: username,
-    });
+    user =
+      await db.orm.public.User.create({
+        leetcodeUsername: username,
+      });
   }
 
-  // Get top-level sections
-  const sections =
-    await db.orm.public.Section
-      .where({
-        parentId: null,
-        active: true,
-      })
-      .all();
-
-  // Calculate progress for every top-level section
+  // Calculate progress for all top-level sections
+  // using a single optimized data load.
   const sectionsWithProgress =
-    await Promise.all(
-      sections.map(async (section) => {
-        const progress =
-          await getSectionProgress(
-            section.id,
-            user.id
-          );
-
-        return {
-          section,
-          progress,
-        };
-      })
-    );
+    await getAllSectionsProgress(user.id);
 
   return (
     <main className="min-h-screen bg-[#F8F7F2] text-[#111111]">
+      <ProgressSync username={username} />
+
       <div className="mx-auto max-w-6xl px-6 py-10 sm:px-8">
 
         {/* Header */}

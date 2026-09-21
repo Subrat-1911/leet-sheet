@@ -3,6 +3,8 @@ import { db } from "@/lib/prisma";
 const LEETCODE_API =
   "https://alfa-leetcode-api.onrender.com";
 
+const API_TIMEOUT_MS = 8000;
+
 type AcceptedSubmission = {
   titleSlug?: string;
   statusDisplay?: string;
@@ -26,7 +28,8 @@ function getSlugFromLeetCodeUrl(url: string) {
 
     const problemsIndex =
       parts.findIndex(
-        (part) => part.toLowerCase() === "problems"
+        (part) =>
+          part.toLowerCase() === "problems"
       );
 
     if (problemsIndex === -1) {
@@ -72,31 +75,28 @@ export async function POST(request: Request) {
     }
 
     // -----------------------------------------
-    // 1. Find or create user
+    // 1. Find user and problem in parallel
     // -----------------------------------------
 
-    let user = await db.orm.public.User
-      .where({
-        leetcodeUsername: username,
-      })
-      .first();
+    const [existingUser, problem] =
+      await Promise.all([
+        db.orm.public.User
+          .where({
+            leetcodeUsername: username,
+          })
+          .first(),
 
-    if (!user) {
-      user = await db.orm.public.User.create({
-        leetcodeUsername: username,
-      });
-    }
+        db.orm.public.Problem
+          .where({
+            id: problemId,
+            active: true,
+          })
+          .first(),
+      ]);
 
     // -----------------------------------------
-    // 2. Find problem
+    // 2. Validate problem
     // -----------------------------------------
-
-    const problem = await db.orm.public.Problem
-      .where({
-        id: problemId,
-        active: true,
-      })
-      .first();
 
     if (!problem) {
       return Response.json(
@@ -109,7 +109,17 @@ export async function POST(request: Request) {
     }
 
     // -----------------------------------------
-    // 3. Check our DB first
+    // 3. Create user if needed
+    // -----------------------------------------
+
+    const user =
+      existingUser ??
+      (await db.orm.public.User.create({
+        leetcodeUsername: username,
+      }));
+
+    // -----------------------------------------
+    // 4. Check our DB FIRST
     // -----------------------------------------
 
     const existingProgress =
@@ -120,7 +130,10 @@ export async function POST(request: Request) {
         })
         .first();
 
-    // Once solved, it stays solved forever.
+    // -----------------------------------------
+    // 5. Already solved = NEVER call API
+    // -----------------------------------------
+
     if (existingProgress?.solved) {
       return Response.json({
         success: true,
@@ -130,8 +143,7 @@ export async function POST(request: Request) {
     }
 
     // -----------------------------------------
-    // 4. Get the actual LeetCode slug
-    //    directly from the stored URL
+    // 6. Get target LeetCode slug
     // -----------------------------------------
 
     const slugFromUrl =
@@ -154,21 +166,67 @@ export async function POST(request: Request) {
       targetSlugs.add(slugFromDatabase);
     }
 
+    if (targetSlugs.size === 0) {
+      return Response.json(
+        {
+          success: false,
+          error:
+            "Could not determine LeetCode problem slug.",
+        },
+        { status: 400 }
+      );
+    }
+
     // -----------------------------------------
-    // 5. Fetch accepted submissions
+    // 7. Fetch accepted submissions
     // -----------------------------------------
 
     const apiUrl =
       `${LEETCODE_API}/${encodeURIComponent(
         username
-      )}/acSubmission?limit=20&t=${Date.now()}`;
+      )}/acSubmission?limit=20`;
 
-    const response = await fetch(apiUrl, {
-      headers: {
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
+    const controller =
+      new AbortController();
+
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, API_TIMEOUT_MS);
+
+    let response: Response;
+
+    try {
+      response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+        cache: "no-store",
+        signal: controller.signal,
+      });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "AbortError"
+      ) {
+        console.error(
+          "LeetCode API request timed out."
+        );
+
+        return Response.json(
+          {
+            success: false,
+            error:
+              "LeetCode API took too long to respond. Please try again.",
+          },
+          { status: 504 }
+        );
+      }
+
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
       console.error(
@@ -194,7 +252,7 @@ export async function POST(request: Request) {
         : [];
 
     // -----------------------------------------
-    // 6. Check ONLY this problem
+    // 8. Check ONLY this problem
     // -----------------------------------------
 
     const solvedOnLeetCode =
@@ -224,7 +282,7 @@ export async function POST(request: Request) {
       });
 
     // -----------------------------------------
-    // 7. Not solved yet
+    // 9. Not solved yet
     // -----------------------------------------
 
     if (!solvedOnLeetCode) {
@@ -236,7 +294,7 @@ export async function POST(request: Request) {
     }
 
     // -----------------------------------------
-    // 8. Permanently mark solved
+    // 10. Permanently mark as solved
     // -----------------------------------------
 
     if (existingProgress) {
@@ -257,7 +315,7 @@ export async function POST(request: Request) {
     }
 
     // -----------------------------------------
-    // 9. Success
+    // 11. Success
     // -----------------------------------------
 
     return Response.json({

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { db } from "@/lib/prisma";
-import { getSectionProgress } from "@/lib/section-progress";
+import { getSectionData } from "@/lib/section-data";
 import ProblemLink from "../problem-link";
+import ProgressSync from "../progress-sync";
 
 type PageProps = {
   params: Promise<{
@@ -41,81 +42,69 @@ export default async function SectionProgressPage({
   }
 
   // Find current section
-  const section = await db.orm.public.Section
-    .where({
-      slug,
-      active: true,
-    })
-    .first();
+  const section =
+    await db.orm.public.Section
+      .where({
+        slug,
+        active: true,
+      })
+      .first();
 
   if (!section) {
     notFound();
   }
 
   // Find current user
-  let user = await db.orm.public.User
-    .where({
-      leetcodeUsername: username,
-    })
-    .first();
+  let user =
+    await db.orm.public.User
+      .where({
+        leetcodeUsername: username,
+      })
+      .first();
 
   // Create user if it doesn't exist
   if (!user) {
-    user = await db.orm.public.User.create({
-      leetcodeUsername: username,
-    });
+    user =
+      await db.orm.public.User.create({
+        leetcodeUsername: username,
+      });
   }
 
-  // Find direct child sections
-  const childSections = await db.orm.public.Section
-    .where({
-      parentId: section.id,
-      active: true,
-    })
-    .all();
+  /*
+   * Load all section data once.
+   *
+   * This gives us:
+   * - Problems grouped by section
+   * - Child sections grouped by parent
+   * - Solved problem IDs
+   * - Cached progress calculation
+   */
+  const {
+    problemsBySection,
+    solvedProblemIds,
+    childrenByParent,
+    getProgress,
+  } = await getSectionData(user.id);
 
-  // Calculate progress for every child section
+  // Direct child sections
+  const childSections =
+    childrenByParent.get(section.id) ?? [];
+
+  // Calculate progress for each direct child
   const childSectionsWithProgress =
-    await Promise.all(
-      childSections.map(async (childSection) => {
-        const progress =
-          await getSectionProgress(
-            childSection.id,
-            user.id
-          );
+    childSections.map((childSection) => ({
+      section: childSection,
+      progress: getProgress(childSection.id),
+    }));
 
-        return {
-          section: childSection,
-          progress,
-        };
-      })
-    );
-
-  // Find problems directly inside this section
-  const problems = await db.orm.public.Problem
-    .where({
-      sectionId: section.id,
-      active: true,
-    })
-    .all();
-
-  // Find solved status for current user
-  const progress =
-    await db.orm.public.UserProgress
-      .where({
-        userId: user.id,
-      })
-      .all();
-
-  // Store solved problem IDs for fast lookup
-  const solvedProblemIds = new Set(
-    progress
-      .filter((item) => item.solved)
-      .map((item) => item.problemId)
-  );
+  // Problems directly inside this section
+  const problems =
+    problemsBySection.get(section.id) ?? [];
 
   return (
     <main className="min-h-screen bg-[#F8F7F2] text-[#111111]">
+      <ProgressSync username={username} />
+
       <div className="mx-auto max-w-6xl px-6 py-10 sm:px-8">
 
         {/* Header */}
@@ -155,7 +144,10 @@ export default async function SectionProgressPage({
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
               {childSectionsWithProgress.map(
-                ({ section: childSection, progress }) => (
+                ({
+                  section: childSection,
+                  progress,
+                }) => (
                   <Link
                     key={childSection.id}
                     href={`/progress/${childSection.slug}?username=${encodeURIComponent(
@@ -192,7 +184,6 @@ export default async function SectionProgressPage({
 
                       </div>
 
-                      {/* Progress bar */}
                       <div className="mt-2 h-1.5 w-full overflow-hidden bg-[#E5E2D9]">
 
                         <div
@@ -246,55 +237,59 @@ export default async function SectionProgressPage({
                 </thead>
 
                 <tbody>
-                  {problems.map((problem, index) => {
-                    const isSolved =
-                      solvedProblemIds.has(
-                        problem.id
+                  {problems.map(
+                    (problem, index) => {
+                      const isSolved =
+                        solvedProblemIds.has(
+                          problem.id
+                        );
+
+                      return (
+                        <tr
+                          key={problem.id}
+                          className={`border-b border-[#E5E2D9] last:border-b-0 transition ${
+                            isSolved
+                              ? "bg-[#E4F1E5]"
+                              : "bg-transparent"
+                          }`}
+                        >
+
+                          <td
+                            className={`px-5 py-4 text-sm ${
+                              isSolved
+                                ? "text-[#4F7655]"
+                                : "text-[#77736A]"
+                            }`}
+                          >
+                            {index + 1}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <ProblemLink
+                              problemId={problem.id}
+                              username={username}
+                              title={problem.title}
+                              leetcodeUrl={
+                                problem.leetcodeUrl
+                              }
+                              solved={isSolved}
+                            />
+                          </td>
+
+                          <td
+                            className={`px-5 py-4 text-sm ${
+                              isSolved
+                                ? "text-[#4F7655]"
+                                : "text-[#111111]"
+                            }`}
+                          >
+                            {problem.difficulty}
+                          </td>
+
+                        </tr>
                       );
-
-                    return (
-                      <tr
-                        key={problem.id}
-                        className={`border-b border-[#E5E2D9] last:border-b-0 transition ${
-                          isSolved
-                            ? "bg-[#E4F1E5]"
-                            : "bg-transparent"
-                        }`}
-                      >
-
-                        <td
-                          className={`px-5 py-4 text-sm ${
-                            isSolved
-                              ? "text-[#4F7655]"
-                              : "text-[#77736A]"
-                          }`}
-                        >
-                          {index + 1}
-                        </td>
-
-                        <td className="px-5 py-4">
-                          <ProblemLink
-                            problemId={problem.id}
-                            username={username}
-                            title={problem.title}
-                            leetcodeUrl={problem.leetcodeUrl}
-                            solved={isSolved}
-                          />
-                        </td>
-
-                        <td
-                          className={`px-5 py-4 text-sm ${
-                            isSolved
-                              ? "text-[#4F7655]"
-                              : "text-[#111111]"
-                          }`}
-                        >
-                          {problem.difficulty}
-                        </td>
-
-                      </tr>
-                    );
-                  })}
+                    }
+                  )}
                 </tbody>
 
               </table>
